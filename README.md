@@ -1,2 +1,2 @@
 # personal-finance-ai-agent
-React + FastAPI financial dashboard featuring AI-driven transaction categorization, budgeting, and real-time insights.
+Full-stack AI personal finance assistant that analyzes spending patterns, categorizes transactions, and generates custom budgets. Built with React, FastAPI, and Python.
