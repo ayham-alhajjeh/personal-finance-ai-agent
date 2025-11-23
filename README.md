@@ -1,2 +1,2 @@
 # personal-finance-ai-agent
-AI-powered personal finance dashboard with budgeting tools, transaction analysis, and automated financial insights.
+React + FastAPI financial dashboard featuring AI-driven transaction categorization, budgeting, and real-time insights.
