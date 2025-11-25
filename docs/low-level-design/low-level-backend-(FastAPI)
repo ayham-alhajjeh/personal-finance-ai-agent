@@ -1,0 +1,114 @@
+# Low-Level Design — Backend (FastAPI)
+
+## 1. Module / "Class" Diagram (by file)
+
+`server/app/`
+
+- `main.py`  
+  - Creates the FastAPI app instance.  
+  - Includes/attaches all routers.
+
+- `routers/health.py`  
+  - Defines `/health` endpoint to check API status.
+
+- `routers/transactions.py`  
+  - Defines `/transactions` CRUD endpoints:
+    - `GET /transactions`
+    - `POST /transactions`
+    - `PUT /transactions/{id}`
+    - `DELETE /transactions/{id}`
+
+- `routers/summary.py`  
+  - Defines `GET /summary` endpoint for dashboard summary.
+
+- `routers/ai_insights.py`  
+  - Defines `POST /ai/insights` to generate AI-based advice.
+
+- `models/transaction.py`  
+  - Pydantic models:
+    - `TransactionBase`
+    - `TransactionCreate`
+    - `TransactionUpdate`
+    - `TransactionOut`
+
+- `models/summary.py`  
+  - Pydantic models for dashboard summary response.
+
+- `models/ai_insight.py`  
+  - Pydantic models for AI insight request/response.
+
+- `services/transactions_service.py`  
+  - Business logic for listing, creating, updating, and deleting transactions.
+
+- `services/summary_service.py`  
+  - Business logic for computing spending summary (totals, by category).
+
+- `services/ai_service.py`  
+  - Business logic for:
+    - selecting relevant data
+    - calling the LLM
+    - storing + returning insights.
+
+- `db/database.py` (later)  
+  - Database engine + session setup.
+
+- `db/transaction_repo.py` (later)  
+  - Low-level DB operations for `transactions` table.
+
+
+## 4. Core Data Models (Pydantic)
+
+### 4.1 Transaction Models (`models/transaction.py`)
+
+- `TransactionBase`
+  - `date: date`
+  - `description: str`
+  - `amount: float`
+  - `category_id: Optional[int]`
+
+- `TransactionCreate(TransactionBase)`
+  - Used for `POST /transactions`.
+
+- `TransactionUpdate`
+  - All fields optional (for updates).
+
+- `TransactionOut(TransactionBase)`
+  - `id: int`
+
+### 4.2 Summary Models (`models/summary.py`)
+
+- `CategorySummary`
+  - `category_name: str`
+  - `total_spent: float`
+  - `budget_limit: Optional[float]`
+  - `difference: Optional[float]`
+
+- `SummaryResult`
+  - `total_spent: float`
+  - `total_income: float`
+  - `by_category: List[CategorySummary]`
+
+### 4.3 AI Insight Models (`models/ai_insight.py`)
+
+- `AIInsightRequest`
+  - `start_date: Optional[date]`
+  - `end_date: Optional[date]`
+
+- `AIInsightResponse`
+  - `insight_text: str`
+  - `generated_at: datetime`
+
+
+## 5. Testing & Error Handling (Short)
+
+- Use `pytest` + FastAPI `TestClient`.
+- Main tests:
+  - `GET /health` returns 200 and correct JSON.
+  - Transactions endpoints only return data for the current user.
+  - Creating a transaction with invalid data → 422 (Pydantic validation).
+  - Updating/deleting a transaction that doesn’t belong to a user → 403 or 404.
+  - Summary endpoint returns correct aggregates for a known test dataset.
+- Common error responses:
+  - 401 Unauthorized: user not logged in (later when auth is added).
+  - 403 Forbidden: trying to access another user’s transaction.
+  - 404 Not Found: transaction ID doesn’t exist.
