@@ -1,0 +1,26 @@
+from typing import Optional
+from pydantic import BaseModel, EmailStr
+
+
+class UserBase(BaseModel):
+    email: EmailStr
+    name: Optional[str] = None
+
+class UserCreate(UserBase):
+    """
+    Data expected by API for user creation.
+    Same as UserBase, seperated to add 
+    more fields later.
+    """
+    pass
+
+
+class UserOut(UserBase):
+    """
+    Data expected by API to return to client
+    when sending back user info 
+    """
+    id: int
+
+    class Config:
+        orm_mode = True
