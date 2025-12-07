@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Numeric, boolean, JSON, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-
 from db.database import Base
 
 
@@ -15,3 +14,5 @@ class UserDB(Base):
 
     
     transactions = relationship("TransactionDB", back_populates = "user")
+    categories = relationship("CategoriesDB", back_populates = "user")
+    budgets = relationship("BudgetsDB", back_populates = "user")
