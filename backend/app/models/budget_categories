@@ -1,0 +1,15 @@
+from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from db.database import Base
+
+class BudgetCategoryJunctionDB(Base):
+    __tablename__ = "budget_category_junction"
+    
+    id = Column(Integer, primary_key = True, index = True)
+    budget_id = Column(Integer, ForeignKey("budgets.id"), nullable = False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable = False)
+
+
+    budgets = relationship("BudgetsDB", back_populates="budget_category_junction")
+    categories = relationship("CategoriesDB", back_populates="budget_category_junction")

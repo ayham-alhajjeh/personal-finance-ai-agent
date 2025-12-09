@@ -16,3 +16,5 @@ class UserDB(Base):
     transactions = relationship("TransactionDB", back_populates = "user")
     categories = relationship("CategoriesDB", back_populates = "user")
     budgets = relationship("BudgetsDB", back_populates = "user")
+    AIinsights = relationship("AIinsightsDB", back_populates = "user")
+    goals = relationship("GoalsDB", back_populates = "user")
