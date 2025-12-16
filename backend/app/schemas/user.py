@@ -13,16 +13,20 @@ class UserCreate(UserBase):
     Same as UserBase, seperated to add 
     more fields later.
     """
-    pass
+    password: str
 
 
 class UserOut(UserBase):
     """
     Data expected by API to return to client
-    when sending back user info 
+    when sending back user info
     """
     id: int
     created_at: datetime
 
     class Config:
         orm_mode = True
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

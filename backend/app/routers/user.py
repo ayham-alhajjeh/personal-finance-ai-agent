@@ -3,10 +3,11 @@ from typing import Optional, List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Cookie, Response, BackgroundTasks, status
 from sqlalchemy.orm import Session
+from utils.security import hash_password, verify_password
 
 from db.database import get_db
 from models.user import UserDB
-from schemas.user import UserBase, UserCreate, UserOut
+from schemas.user import UserBase, UserCreate, UserOut, UserLogin
 
 
 router = APIRouter(
@@ -34,10 +35,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="User with this email already exists"
         )
     
+    hashed_password = hash_password(user.password)
+    
     # Create new user
     db_user = UserDB(
         email=user.email,
-        name=user.name
+        name=user.name,
+        hashed_password=hashed_password
     )
     db.add(db_user)
     db.commit()
@@ -137,3 +141,25 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return None
+
+@router.post("/login")
+def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    """
+    Login user with email and password
+    """
+    user = db.query(UserDB).filter(UserDB.email == credentials.email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    if not verify_password(credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    # In real app, return a JWT token here
+    return {"message": "Login successful", "user_id": user.id}
