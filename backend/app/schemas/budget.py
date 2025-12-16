@@ -1,26 +1,23 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
-from datetime import datetime
 
 class BudgetBase(BaseModel):
-    userID: int
-    
+    name: Optional[str] = None
+    end_date: date
 
 class BudgetCreate(BudgetBase):
-    name: str
-    start_date: Optional[date]
-    end_date: Optional[date]
-    created_at: datetime
+    start_date: Optional[date] = None
 
-class BudgetUpdate(BudgetBase):
+class BudgetUpdate(BaseModel):
     name: Optional[str] = None
     start_date: Optional[date] = None
-    end_date: Optional[date]
-
+    end_date: Optional[date] = None
 
 class BudgetOut(BudgetBase):
     id: int
+    user_id: int
+    start_date: date
 
-    class Config():
+    class Config:
         orm_mode = True

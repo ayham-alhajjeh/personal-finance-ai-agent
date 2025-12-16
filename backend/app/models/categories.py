@@ -10,7 +10,7 @@ class CategoriesDB(Base):
     id = Column(Integer, primary_key = True, index = True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable = False)
     name = Column(String, nullable = False)
-    Type = Column(String, nullable = True)
+    type = Column(String, nullable = True)
     created_at = Column(Date, server_default = func.current_date())
 
 

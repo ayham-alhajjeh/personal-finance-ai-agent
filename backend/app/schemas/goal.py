@@ -1,24 +1,24 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
-from datetime import date
+from datetime import datetime, date
 
 class GoalsBase(BaseModel):
-    userID: int
-    created_at: datetime
+    name: str
+    target_amount: Optional[int] = None
+    target_date: Optional[date] = None
 
 class GoalsCreate(GoalsBase):
-    name: str
-    targetAmount: Optional[float]
-    targetDate: Optional[date]
+    pass
 
-class GoalsUpdate(GoalsBase):
-    name: Optional[str]: None
-    targetAmount: Optional[float] = None
-    targetDate: Optional[date] = None
+class GoalsUpdate(BaseModel):
+    name: Optional[str] = None
+    target_amount: Optional[int] = None
+    target_date: Optional[date] = None
 
 class GoalsOut(GoalsBase):
     id: int
+    user_id: int
+    created_at: datetime
 
-    class Config():
+    class Config:
         orm_mode = True

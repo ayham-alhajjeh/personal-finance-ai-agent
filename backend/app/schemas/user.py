@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -21,6 +22,7 @@ class UserOut(UserBase):
     when sending back user info 
     """
     id: int
+    created_at: datetime
 
     class Config:
         orm_mode = True
