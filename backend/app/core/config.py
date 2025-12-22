@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     ALLOWED_ORIGINS: str = ""
 
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: str = ""  # Optional for now
 
     @field_validator("ALLOWED_ORIGINS")
     def parse_allowed_origins(cls, v: str) -> List[str]:

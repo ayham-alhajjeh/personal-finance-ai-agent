@@ -14,4 +14,4 @@ class AI_InsightOut(AI_InsightBase):
     insightText: str
 
     class Config():
-        orm_mode = True
+        from_attributes = True

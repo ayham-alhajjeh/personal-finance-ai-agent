@@ -20,4 +20,4 @@ class BudgetOut(BudgetBase):
     start_date: date
 
     class Config:
-        orm_mode = True
+        from_attributes = True
