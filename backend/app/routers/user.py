@@ -4,6 +4,8 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Cookie, Response, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from utils.security import hash_password, verify_password
+from utils.jwt import create_access_token
+from utils.auth import get_current_user
 
 from db.database import get_db
 from models.user import UserDB
@@ -145,21 +147,36 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
     """
-    Login user with email and password
+    Login user with email and password - returns JWT access token
     """
     user = db.query(UserDB).filter(UserDB.email == credentials.email).first()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-    
+
     if not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-    
-    # In real app, return a JWT token here
-    return {"message": "Login successful", "user_id": user.id}
+
+    # Create JWT token
+    access_token = create_access_token(data={"sub": str(user.id)})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user.id
+    }
+
+
+# Get current user (protected route example)
+@router.get("/me", response_model=UserOut)
+def get_current_user_info(current_user: UserDB = Depends(get_current_user)):
+    """
+    Get current authenticated user's information
+    """
+    return current_user

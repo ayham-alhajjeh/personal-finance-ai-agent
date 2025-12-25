@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from models.transaction import TransactionDB
+from models.user import UserDB
 from schemas.transaction import TransactionCreate, TransactionUpdate, TransactionOut
+from utils.auth import get_current_user
 
 router = APIRouter(
     prefix="/transactions",
@@ -14,32 +16,30 @@ router = APIRouter(
 
 # Create a new transaction
 @router.post("/", response_model=TransactionOut, status_code=status.HTTP_201_CREATED)
-def create_transaction(transaction: TransactionCreate, user_id: int, db: Session = Depends(get_db)):
+def create_transaction(
+    transaction: TransactionCreate,
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Create a new transaction for a user
+    Create a new transaction for the authenticated user
     """
-    # Verify user exists
-    from models.user import UserDB
-    user = db.query(UserDB).filter(UserDB.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {user_id} not found"
-        )
-
-    # Verify category exists if provided
+    # Verify category exists if provided and belongs to user
     if transaction.category_id:
         from models.categories import CategoriesDB
-        category = db.query(CategoriesDB).filter(CategoriesDB.id == transaction.category_id).first()
+        category = db.query(CategoriesDB).filter(
+            CategoriesDB.id == transaction.category_id,
+            CategoriesDB.user_id == current_user.id
+        ).first()
         if not category:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Category with id {transaction.category_id} not found"
+                detail=f"Category with id {transaction.category_id} not found or doesn't belong to you"
             )
 
-    # Create transaction
+    # Create transaction for the authenticated user
     db_transaction = TransactionDB(
-        user_id=user_id,
+        user_id=current_user.id,
         date=transaction.date,
         description=transaction.description,
         amount=transaction.amount,
@@ -52,37 +52,44 @@ def create_transaction(transaction: TransactionCreate, user_id: int, db: Session
     return db_transaction
 
 
-# Get transaction by ID
-@router.get("/{transaction_id}", response_model=TransactionOut)
-def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    """
-    Get a specific transaction by ID
-    """
-    transaction = db.query(TransactionDB).filter(TransactionDB.id == transaction_id).first()
-    if not transaction:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
-        )
-    return transaction
-
-
-# Get all transactions for a user
-@router.get("/user/{user_id}", response_model=List[TransactionOut])
-def get_user_transactions(
-    user_id: int,
+# Get all transactions for current user
+@router.get("/", response_model=List[TransactionOut])
+def get_my_transactions(
     skip: int = 0,
     limit: int = 100,
+    current_user: UserDB = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all transactions for a specific user with pagination
+    Get all transactions for the authenticated user with pagination
     """
     transactions = db.query(TransactionDB).filter(
-        TransactionDB.user_id == user_id
+        TransactionDB.user_id == current_user.id
     ).offset(skip).limit(limit).all()
 
     return transactions
+
+
+# Get transaction by ID (only if it belongs to user)
+@router.get("/{transaction_id}", response_model=TransactionOut)
+def get_transaction(
+    transaction_id: int,
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get a specific transaction by ID (must belong to authenticated user)
+    """
+    transaction = db.query(TransactionDB).filter(
+        TransactionDB.id == transaction_id,
+        TransactionDB.user_id == current_user.id
+    ).first()
+    if not transaction:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction with id {transaction_id} not found or doesn't belong to you"
+        )
+    return transaction
 
 
 # Get transactions by category
@@ -91,13 +98,15 @@ def get_transactions_by_category(
     category_id: int,
     skip: int = 0,
     limit: int = 100,
+    current_user: UserDB = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all transactions for a specific category
+    Get all transactions for a specific category (must belong to user)
     """
     transactions = db.query(TransactionDB).filter(
-        TransactionDB.category_id == category_id
+        TransactionDB.category_id == category_id,
+        TransactionDB.user_id == current_user.id
     ).offset(skip).limit(limit).all()
 
     return transactions
@@ -108,16 +117,20 @@ def get_transactions_by_category(
 def update_transaction(
     transaction_id: int,
     transaction_update: TransactionUpdate,
+    current_user: UserDB = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Update a transaction
+    Update a transaction (must belong to user)
     """
-    transaction = db.query(TransactionDB).filter(TransactionDB.id == transaction_id).first()
+    transaction = db.query(TransactionDB).filter(
+        TransactionDB.id == transaction_id,
+        TransactionDB.user_id == current_user.id
+    ).first()
     if not transaction:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
+            detail=f"Transaction with id {transaction_id} not found or doesn't belong to you"
         )
 
     # Update fields if provided
@@ -128,13 +141,16 @@ def update_transaction(
     if transaction_update.amount is not None:
         transaction.amount = transaction_update.amount
     if transaction_update.category_id is not None:
-        # Verify category exists
+        # Verify category exists and belongs to user
         from models.categories import CategoriesDB
-        category = db.query(CategoriesDB).filter(CategoriesDB.id == transaction_update.category_id).first()
+        category = db.query(CategoriesDB).filter(
+            CategoriesDB.id == transaction_update.category_id,
+            CategoriesDB.user_id == current_user.id
+        ).first()
         if not category:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Category with id {transaction_update.category_id} not found"
+                detail=f"Category with id {transaction_update.category_id} not found or doesn't belong to you"
             )
         transaction.category_id = transaction_update.category_id
 
@@ -145,15 +161,22 @@ def update_transaction(
 
 # Delete transaction
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
+def delete_transaction(
+    transaction_id: int,
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Delete a transaction by ID
+    Delete a transaction by ID (must belong to user)
     """
-    transaction = db.query(TransactionDB).filter(TransactionDB.id == transaction_id).first()
+    transaction = db.query(TransactionDB).filter(
+        TransactionDB.id == transaction_id,
+        TransactionDB.user_id == current_user.id
+    ).first()
     if not transaction:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
+            detail=f"Transaction with id {transaction_id} not found or doesn't belong to you"
         )
 
     db.delete(transaction)
