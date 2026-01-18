@@ -133,7 +133,7 @@ class TestAuthenticationSecurity:
     def test_password_not_in_response(self, client):
         """Test that password is never returned in API responses"""
         response = client.post(
-            "/users/create",
+            "/users/",
             json={
                 "email": "secure@example.com",
                 "name": "Secure User",

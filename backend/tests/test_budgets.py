@@ -35,7 +35,7 @@ class TestBudgetCreation:
                 "end_date": str(date.today() + timedelta(days=30))
             }
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_create_budget_missing_fields(self, client, auth_headers):
         """Test creating budget with missing required fields"""

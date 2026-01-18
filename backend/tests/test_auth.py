@@ -8,7 +8,7 @@ class TestUserRegistration:
     def test_create_user_success(self, client):
         """Test successful user creation"""
         response = client.post(
-            "/users/create",
+            "/users/",
             json={
                 "email": "newuser@example.com",
                 "name": "New User",
@@ -25,7 +25,7 @@ class TestUserRegistration:
     def test_create_user_duplicate_email(self, client, test_user):
         """Test creating user with duplicate email fails"""
         response = client.post(
-            "/users/create",
+            "/users/",
             json={
                 "email": test_user.email,
                 "name": "Another User",
@@ -33,12 +33,12 @@ class TestUserRegistration:
             }
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "already registered" in response.json()["detail"].lower()
+        assert "already exists" in response.json()["detail"].lower()
 
     def test_create_user_invalid_email(self, client):
         """Test creating user with invalid email format"""
         response = client.post(
-            "/users/create",
+            "/users/",
             json={
                 "email": "not-an-email",
                 "name": "Test User",
@@ -50,7 +50,7 @@ class TestUserRegistration:
     def test_create_user_missing_password(self, client):
         """Test creating user without password fails"""
         response = client.post(
-            "/users/create",
+            "/users/",
             json={
                 "email": "test@example.com",
                 "name": "Test User"
@@ -126,7 +126,7 @@ class TestJWTAuthentication:
     def test_get_current_user_without_token(self, client):
         """Test accessing protected endpoint without token fails"""
         response = client.get("/users/me")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_get_current_user_with_invalid_token(self, client):
         """Test accessing protected endpoint with invalid token fails"""
@@ -142,7 +142,7 @@ class TestJWTAuthentication:
             "/users/me",
             headers={"Authorization": "NotBearer token123"}
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestUserManagement:

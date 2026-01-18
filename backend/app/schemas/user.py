@@ -7,6 +7,14 @@ class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
 
+class UserUpdate(BaseModel):
+    """
+    Optional data expected by API for user update.
+    Seperate from UserBase to allow optional fields for Email.
+    """
+    email: Optional[str] = None
+    name: Optional[str] = None
+
 class UserCreate(UserBase):
     """
     Data expected by API for user creation.

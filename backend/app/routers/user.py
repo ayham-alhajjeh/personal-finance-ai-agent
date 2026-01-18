@@ -9,7 +9,7 @@ from utils.auth import get_current_user
 
 from db.database import get_db
 from models.user import UserDB
-from schemas.user import UserBase, UserCreate, UserOut, UserLogin
+from schemas.user import UserBase, UserCreate, UserOut, UserLogin, UserUpdate
 
 
 router = APIRouter(
@@ -50,6 +50,14 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     
     return db_user
+
+# Get current user (protected route example)
+@router.get("/me", response_model=UserOut)
+def get_current_user_info(current_user: UserDB = Depends(get_current_user)):
+    """
+    Get current authenticated user's information
+    """
+    return current_user
 
 
 # Get user by ID
@@ -94,7 +102,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
 
 # Update user
 @router.put("/{user_id}", response_model=UserOut)
-def update_user(user_id: int, user_update: UserBase, db: Session = Depends(get_db)):
+def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
     """
     Update user information
     """
@@ -173,10 +181,3 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     }
 
 
-# Get current user (protected route example)
-@router.get("/me", response_model=UserOut)
-def get_current_user_info(current_user: UserDB = Depends(get_current_user)):
-    """
-    Get current authenticated user's information
-    """
-    return current_user

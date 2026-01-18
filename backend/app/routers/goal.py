@@ -37,6 +37,25 @@ def create_goal(
 
     return db_goal
 
+# Get active goals (target_date is in the future)
+@router.get("/active", response_model=List[GoalsOut])
+def get_active_goals(
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all active goals for the authenticated user (target date in future)
+    """
+    from datetime import date
+
+    today = date.today()
+    goals = db.query(GoalsDB).filter(
+        GoalsDB.user_id == current_user.id,
+        GoalsDB.target_date >= today
+    ).all()
+
+    return goals
+
 
 # Get goal by ID
 @router.get("/{goal_id}", response_model=GoalsOut)
@@ -78,24 +97,7 @@ def get_user_goals(
     return goals
 
 
-# Get active goals (target_date is in the future)
-@router.get("/active", response_model=List[GoalsOut])
-def get_active_goals(
-    current_user: UserDB = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Get all active goals for the authenticated user (target date in future)
-    """
-    from datetime import date
 
-    today = date.today()
-    goals = db.query(GoalsDB).filter(
-        GoalsDB.user_id == current_user.id,
-        GoalsDB.target_date >= today
-    ).all()
-
-    return goals
 
 
 # Update goal

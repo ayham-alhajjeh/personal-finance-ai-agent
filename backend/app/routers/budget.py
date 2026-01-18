@@ -38,6 +38,29 @@ def create_budget(
     return db_budget
 
 
+# Get active budgets for authenticated user (current date is between start_date and end_date)
+@router.get("/active", response_model=List[BudgetOut])
+def get_active_budgets(
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all active budgets for the authenticated user
+    """
+    from datetime import date
+    from sqlalchemy import and_
+
+    today = date.today()
+    budgets = db.query(BudgetsDB).filter(
+        and_(
+            BudgetsDB.user_id == current_user.id,
+            BudgetsDB.start_date <= today,
+            BudgetsDB.end_date >= today
+        )
+    ).all()
+
+    return budgets
+
 # Get budget by ID
 @router.get("/{budget_id}", response_model=BudgetOut)
 def get_budget(
@@ -74,30 +97,6 @@ def get_user_budgets(
     budgets = db.query(BudgetsDB).filter(
         BudgetsDB.user_id == current_user.id
     ).offset(skip).limit(limit).all()
-
-    return budgets
-
-
-# Get active budgets for authenticated user (current date is between start_date and end_date)
-@router.get("/active", response_model=List[BudgetOut])
-def get_active_budgets(
-    current_user: UserDB = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Get all active budgets for the authenticated user
-    """
-    from datetime import date
-    from sqlalchemy import and_
-
-    today = date.today()
-    budgets = db.query(BudgetsDB).filter(
-        and_(
-            BudgetsDB.user_id == current_user.id,
-            BudgetsDB.start_date <= today,
-            BudgetsDB.end_date >= today
-        )
-    ).all()
 
     return budgets
 

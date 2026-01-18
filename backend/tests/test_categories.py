@@ -38,7 +38,7 @@ class TestCategoryCreation:
             "/categories/",
             json={"name": "Test Category"}
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_create_category_missing_name(self, client, auth_headers):
         """Test creating category without name fails"""

@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import OAuth2PasswordBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from db.database import get_db
@@ -7,17 +7,17 @@ from models.user import UserDB
 from utils.jwt import decode_access_token
 
 # Security scheme for Bearer token
-security = HTTPBearer()
+security = OAuth2PasswordBearer(tokenUrl="token")
+
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    token: str = Depends(security),
     db: Session = Depends(get_db)
 ) -> UserDB:
     """
     Dependency to get the current authenticated user from JWT token
     """
-    token = credentials.credentials
 
     # Decode the token
     payload = decode_access_token(token)

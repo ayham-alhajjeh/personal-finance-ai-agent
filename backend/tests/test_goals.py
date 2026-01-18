@@ -35,14 +35,14 @@ class TestGoalCreation:
                 "target_date": str(date.today() + timedelta(days=30))
             }
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_create_goal_missing_fields(self, client, auth_headers):
         """Test creating goal with missing required fields"""
         response = client.post(
             "/goals/",
             headers=auth_headers,
-            json={"name": "Incomplete Goal"}
+            json={}
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

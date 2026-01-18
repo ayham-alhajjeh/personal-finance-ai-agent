@@ -59,7 +59,7 @@ class TestTransactionCreation:
                 "amount": 100.00
             }
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_create_transaction_missing_fields(self, client, auth_headers):
         """Test creating transaction with missing required fields"""
