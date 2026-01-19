@@ -1,0 +1,170 @@
+/* Spending Chart Card */
+.spending-chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title-section {
+  margin-bottom: 24px;
+}
+
+.card-title-section h3 {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.card-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
+}
+
+.chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+  align-items: center;
+  flex: 1;
+}
+
+/* Donut Chart */
+.donut-chart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: white;
+  border-radius: 50%;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-total {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.donut-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Legend */
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.legend-item:hover {
+  background: #f7fafc;
+  transform: translateX(4px);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-category {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.legend-amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legend-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.legend-percentage {
+  font-size: 13px;
+  font-weight: 600;
+  color: #718096;
+  padding: 2px 8px;
+  background: #edf2f7;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .chart-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .donut-chart {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .spending-chart-card {
+    padding: 20px;
+  }
+
+  .donut-chart {
+    width: 180px;
+    height: 180px;
+  }
+
+  .donut-center {
+    width: 120px;
+    height: 120px;
+  }
+
+  .donut-total {
+    font-size: 24px;
+  }
+}
